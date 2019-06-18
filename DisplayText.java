@@ -1,3 +1,7 @@
+/*  Author:     Ricardo Mokveld
+    Date:       01-04-2019
+    Studentnr:  0971051
+*/
 import java.awt.*;
 public class DisplayText extends ScreenElement implements OutputDevice {
     private Label label;
@@ -6,7 +10,11 @@ public class DisplayText extends ScreenElement implements OutputDevice {
         super(name, pos);
         label = new Label();
         label.setForeground(Color.WHITE);
-        label.setFont(new Font("SansSerif", Font.BOLD, 30));
+        if( name.equals("textTen") || name.equals("textTwenty") || name.equals("textFifty") ){
+            label.setFont(new Font("SansSerif", Font.PLAIN, 15));
+        }else{
+            label.setFont(new Font("SansSerif", Font.BOLD, 30));
+        }
         label.setBounds(pos.x, pos.y, 500, 35);
     }
 

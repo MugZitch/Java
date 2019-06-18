@@ -1,3 +1,7 @@
+/*  Author:     Ricardo Mokveld
+    Date:       01-04-2019
+    Studentnr:  0971051
+*/
 import java.awt.*;
 
 public class ATMScreen extends java.awt.Container {
@@ -14,12 +18,12 @@ public class ATMScreen extends java.awt.Container {
     public void paint(Graphics g) {
         super.paint(g);
         g.setColor(Color.RED);
-        g.fillRoundRect(347, 230, 35, 35, 10, 10);
-        g.fillRect(377, 260, 5, 5);
+        g.fillRoundRect(417, 330, 35, 35, 10, 10);
+        g.fillRect(447, 360, 5, 5);
         g.setColor(Color.WHITE);
-        g.setFont(new Font("SansSerif", Font.BOLD, 20));
-        g.drawString("HR", 350, 250);
+        g.setFont(new Font("SansSerif", Font.BOLD, 18));
+        g.drawString("MD", 420, 350);
         g.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        g.drawString("bank", 351, 260);
+        g.drawString("bank", 421, 360);
     }
 }

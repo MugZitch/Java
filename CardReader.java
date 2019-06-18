@@ -1,8 +1,13 @@
+/*  Author:     Ricardo Mokveld
+    Date:       01-04-2019
+    Studentnr:  0971051
+*/
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 public class CardReader extends HardwareElement implements InputDevice {
     private BufferedReader reader;
+    private static String input;
     public CardReader(String name){
         super(name);
         this.reader = new BufferedReader(new InputStreamReader(System.in));
@@ -10,12 +15,12 @@ public class CardReader extends HardwareElement implements InputDevice {
 
     @Override
     public String getInput() {
-        System.out.println("To simulate inserting card, enter card number");
-        try{
-            return reader.readLine();
-        }
-        catch (Exception e){
-            return null;
-        }
+        input = null;
+        Serial.listenSerial();
+        return input;
+    }
+
+    public static void setInput(String data){
+        input = data;
     }
 }
