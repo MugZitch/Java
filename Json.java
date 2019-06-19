@@ -1,4 +1,8 @@
 import org.json.*;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+
 public class Json {
     //this function returns true if the call is succesfull
     public static Boolean getStatus(String json){
@@ -26,6 +30,23 @@ public class Json {
             return balance;
         }else {
             return -1;
+        }
+    }
+
+    public static ArrayList getBills(String json){
+        JSONObject obj = new JSONObject(json);
+        String status = obj.getString("status");
+        if(status.equals("0")){
+            int ten = obj.getInt("ten");
+            int twenty = obj.getInt("twenty");
+            int fifty = obj.getInt("fifty");
+            ArrayList<Integer> bills = new ArrayList<>();
+            bills.add(ten);
+            bills.add(twenty);
+            bills.add(fifty);
+            return bills;
+        }else{
+            return null;
         }
     }
 }

@@ -7,6 +7,8 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+
 import org.json.*;
 
 public class Database{
@@ -15,7 +17,7 @@ public class Database{
 
     public static boolean checkcard(String iban){
         String url = "https://monarchdouglasbank.tk/api/checkcard.php";
-        String urlParameters = "iban=" + iban + "&location=Nieks-ATM";
+        String urlParameters = "iban=" + iban + "&location=Ricardo's-ATM";
         try{
             json = makeConnection(url, urlParameters);
         }catch(Exception e) {
@@ -56,7 +58,7 @@ public class Database{
 
     public static boolean withdraw(String iban, String pin, String amount){
         String url = "https://monarchdouglasbank.tk/api/withdraw.php";
-        String urlParameters = "iban=" + iban + "&pin=" + pin + "&amount=" + amount + "&location=Nieks-ATM";
+        String urlParameters = "iban=" + iban + "&pin=" + pin + "&amount=" + amount + "&location=Ricardo's-ATM";
         try{
             json = makeConnection(url, urlParameters);
         }catch(Exception e) {
@@ -67,7 +69,7 @@ public class Database{
 
     public static boolean atm(int ten, int twenty, int fifty){
         String url = "https://monarchdouglasbank.tk/api/atm.php";
-        String urlParameters = "ten=" + ten + "&twenty=" + twenty + "&fifty=" + fifty;
+        String urlParameters = "ten=" + ten + "&twenty=" + twenty + "&fifty=" + fifty + "&atm_id=1";
         try{
             json = makeConnection(url, urlParameters);
         }catch(Exception e) {
@@ -76,6 +78,16 @@ public class Database{
         return Json.getStatus(json);
     }
 
+    public static ArrayList getbills(){
+        String url = "https://monarchdouglasbank.tk/api/getbills.php";
+        String urlParameters = "auth=e73B9rm0qeEPgQ";
+        try{
+            json = makeConnection(url, urlParameters);
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+        return Json.getBills(json);
+    }
 
     public static String makeConnection(String url, String urlParameters) throws IOException{
         byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);

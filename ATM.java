@@ -2,6 +2,7 @@
     Date:       01-04-2019
     Studentnr:  0971051
 */
+
 import java.awt.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -16,6 +17,7 @@ public class ATM {
     private ATMScreen as;
     private DisplayText text = new DisplayText("Insert", new Point(10, 50));
     private DisplayText text2 = new DisplayText("Insert", new Point(10, 300));
+    private DisplayText text3 = new DisplayText("Total", new Point(250, 100));
     private DisplayText textTen = new DisplayText("textTen", new Point(250, 150));
     private DisplayText textTwenty = new DisplayText("textTwenty", new Point(250, 180));
     private DisplayText textFifty = new DisplayText("textFifty", new Point(250, 210));
@@ -34,29 +36,17 @@ public class ATM {
     private String wachtwoord = "";
     private String chosenAmount = "";
     private boolean moneyTaken = false;
-    private boolean textAdded = false;
-    private ScreenButton button1 = new ScreenButton("1", new Point(100, 130));
-    private ScreenButton button2 = new ScreenButton("2", new Point(130, 130));
-    private ScreenButton button3 = new ScreenButton("3", new Point(160, 130));
-    private ScreenButton button4 = new ScreenButton("4", new Point(100, 160));
-    private ScreenButton button5 = new ScreenButton("5", new Point(130, 160));
-    private ScreenButton button6 = new ScreenButton("6", new Point(160, 160));
-    private ScreenButton button7 = new ScreenButton("7", new Point(100, 190));
-    private ScreenButton button8 = new ScreenButton("8", new Point(130, 190));
-    private ScreenButton button9 = new ScreenButton("9", new Point(160, 190));
-    private ScreenButton button0 = new ScreenButton("0", new Point(130, 220));
+    int bills10;
+    int bills20;
+    int bills50;
+
     private ScreenButton deleteButton = new ScreenButton("delete", new Point(160, 220));
     private ScreenButton okayButton = new ScreenButton("okay", new Point(160, 220));
     private ScreenButton buttonDeposit = new ScreenButton("Deposit", new Point(100, 150));
     private ScreenButton buttonWithdraw = new ScreenButton("Withdraw", new Point(200, 150));
     private ScreenButton buttonCheckBalance = new ScreenButton("Check Balance", new Point(100, 175));
     private ScreenButton buttonQuickCash = new ScreenButton("Quick cash 70", new Point(100, 225));
-    private ScreenButton Quitbutton = new ScreenButton("Quit", new Point(330, 300));
-    private ScreenButton button20 = new ScreenButton("20", new Point(100, 150));
-    private ScreenButton button50 = new ScreenButton("50", new Point(200, 150));
-    private ScreenButton button100 = new ScreenButton("100", new Point(100, 225));
-    private ScreenButton button200 = new ScreenButton("200", new Point(200, 225));
-    private ScreenButton buttonChooseAmount = new ScreenButton("Choose amount", new Point(100, 255));
+    private ScreenButton Quitbutton = new ScreenButton("Quit", new Point(330, 340));
     private ScreenButton buttonja = new ScreenButton(" JA", new Point(100, 150));
     private ScreenButton buttonnee = new ScreenButton("NEE", new Point(200, 150));
     private ScreenButton buttonMinTen = new ScreenButton("-10", new Point(110, 150));
@@ -119,8 +109,14 @@ public class ATM {
         Deze wordt herhaaldelijk aangeroepen zodat iemand niet verder kan als de client niet bij de bank bekend is.
          */
 
+        ArrayList<Integer> bills = Database.getbills();
+        bills10 = bills.get(0);
+        bills20 = bills.get(1);
+        bills50 = bills.get(2);
+
         do {
             cardnumber = card.getInput();
+            //cardnumber = "SU13MODO609140";
         }while(cardnumber == null);
 
 //        if (!Database.checkcard(cardnumber)){
@@ -139,16 +135,7 @@ public class ATM {
         /*
         In deze method worden de buttons voor de pincode toegevoegd aan het scherm
          */
-        as.add(button1);
-        as.add(button2);
-        as.add(button3);
-        as.add(button4);
-        as.add(button5);
-        as.add(button6);
-        as.add(button7);
-        as.add(button8);
-        as.add(button9);
-        as.add(button0);
+
         as.add(Quitbutton);
         as.add(deleteButton);
         as.add(okayButton);
@@ -162,20 +149,10 @@ public class ATM {
          */
         ArrayList<InputDevice> lijst = new ArrayList<InputDevice>();
 
-        lijst.add(button1);
-        lijst.add(button2);
-        lijst.add(button3);
-        lijst.add(button4);
-        lijst.add(button5);
-        lijst.add(button6);
-        lijst.add(button7);
-        lijst.add(button8);
-        lijst.add(button9);
-        lijst.add(button0);
-        lijst.add(Quitbutton);
         lijst.add(keypad);
-        lijst.add(deleteButton);
+        lijst.add(Quitbutton);
         lijst.add(okayButton);
+        lijst.add(deleteButton);
         String textBox = "";
         while (true) {
             for (InputDevice Inputdevice : lijst) {
@@ -211,18 +188,20 @@ public class ATM {
                     }
                     if (wachtwoord.length() >= 4) {
                         pinAttempts = Database.checkpin(cardnumber, wachtwoord);
+                        if(pinAttempts > 3){
+                            text.giveOutput("Uw kaart is geblokkeerd");
+                            try {
+                                sleep(3000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            restart();
+                        }
                         if (pinAttempts == -1) {
                             //de pin is correct
                             pinCorrect = true;
                             break;
-                        } else if (pinAttempts > 3) {
-                            text.giveOutput("U heeft dit te vaak gedaan");
-                            text2.giveOutput("Uw kaart is geblokeerd!");
-                            as.add(text);
-                            as.add(text2);
-                            wachtwoord = "";
-                            textBox = "";
-                        } else {
+                        }else {
                             text.giveOutput("U heeft nog " + (3 - pinAttempts) + " pogingen over. \n");
                             text2.giveOutput("Probeer opnieuw");
                             as.add(text);
@@ -252,8 +231,13 @@ public class ATM {
 
         as.add(buttonDeposit);
         as.add(buttonWithdraw);
-        as.add(buttonQuickCash);
         as.add(Quitbutton);
+
+        //Communicatie met de server om te kijken of de biljetten aanwezig zijn.
+        //Als dit niet zo is, dan is de optie quick cash niet beschikbaar.
+        if((twenty + 1 < bills20) && (fifty + 1 < bills50)){
+            as.add(buttonQuickCash);
+        }
 
         ArrayList<InputDevice> lijst = new ArrayList<InputDevice>();
         lijst.add(buttonDeposit);
@@ -274,8 +258,7 @@ public class ATM {
                 as.clear();
                 text.giveOutput("you may now choose an amount");
                 as.add(text);
-                addMoneyButtons();
-                checkMoneyButtons();
+                chooseBills();
                 break;
             }
             else if(input == "Deposit"){
@@ -296,7 +279,10 @@ public class ATM {
             }else if(input == "Quick cash 70"){
                 money = 70;
                 if(Database.withdraw(cardnumber, wachtwoord, "70")){
+                    Database.atm(0, 1, 1);
                     break;
+                }else{
+                    text2.giveOutput("You don't have enough money");
                 }
             }else if(input == "Quit"){
                 restart();
@@ -304,70 +290,6 @@ public class ATM {
         }
     }
 
-    private void addMoneyButtons() {
-        /*
-        Deze method voegt de buttons toe die nodig zijn om een bedrag te kiezen.
-         */
-        as.add(button20);
-        as.add(button50);
-        as.add(button100);
-        as.add(button200);
-        as.add(Quitbutton);
-        as.add(buttonChooseAmount);
-    }
-
-    private void checkMoneyButtons() {
-        /*
-        Deze method checkt herhaaldelijk of de buttons om een bedrag te kiezen zijn ingedrukt of niet.
-        Verder kijkt deze method of het gekozen bedrag wel kan.
-        Als de klant niet genoeg geld heeft dan krijgt de klant hierop een melding en kan deze het opnieuw proberen.
-         */
-        ArrayList<InputDevice> lijst = new ArrayList<InputDevice>();
-        lijst.add(button20);
-        lijst.add(button50);
-        lijst.add(button100);
-        lijst.add(button200);
-        lijst.add(Quitbutton);
-        lijst.add(buttonChooseAmount);
-        while (true) {
-            for (InputDevice Inputdevice : lijst) {
-                input = Inputdevice.getInput();
-                Thread.yield();
-                if(input == "Quit"){
-                    restart();
-                }
-                if(input == "Choose amount"){
-                    //chooseAmount();
-                    chooseBills();
-                    break;
-                }
-                if (input != null) {
-                    money = Integer.parseInt(input);
-                    if(Database.withdraw(cardnumber, wachtwoord, input)){
-                        moneyTaken = true;
-                        break;
-                    }else {
-                        text.giveOutput("You don't have enough money..");
-                        as.add(text);
-                        if (!textAdded) {
-                            as.add(text);
-                            textAdded = true;
-                        }
-                        try {
-                            sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        text.giveOutput("Please try again.");
-                        as.add(text);
-                    }
-                }
-            }
-            if (moneyTaken) {
-                break;
-            }
-        }
-    }
 
     private void checkReceiptButtons() {
         /*
@@ -403,6 +325,9 @@ public class ATM {
     }
 
     private void chooseBills(){
+        /* Deze method voegt de optie toe om zelf biljetten te kiezen
+         * ook geeft deze aan of het briefje dat jij wilt er wel is.
+          * of als er bijvoorbeeld maar 5 zijn dan zegt die dat nadat je al 5x 10 hebt gekozen*/
         as.clear();
         text.giveOutput("Choose an amount up to 500");
         as.add(text);
@@ -413,6 +338,7 @@ public class ATM {
         as.add(buttonPlusFifty);
         as.add(buttonMinFifty);
         as.add(buttonOkay);
+        as.add(Quitbutton);
 
         ArrayList<InputDevice> lijst = new ArrayList<InputDevice>();
         lijst.add(buttonPlusTen);
@@ -422,12 +348,17 @@ public class ATM {
         lijst.add(buttonPlusFifty);
         lijst.add(buttonMinFifty);
         lijst.add(buttonOkay);
+        lijst.add(Quitbutton);
 
         while (true) {
             for (InputDevice Inputdevice : lijst) {
                 input = Inputdevice.getInput();
 
                 Thread.yield();
+                if(input != null){
+                    text2.giveOutput("");
+                    as.add(text2);
+                }
 
                 if(input == "-10"){
                     if(ten > 0){
@@ -436,23 +367,25 @@ public class ATM {
                     }
                     textTen.giveOutput(ten + "x 10 = " + 10*ten);
                     as.add(textTen);
-                    text2.giveOutput("Total = " + money);
-                    as.add(text2);
-                    System.out.println(money);
+                    text3.giveOutput("Total = " + money);
+                    as.add(text3);
                 }
                 if(input == "+10"){
                     if (money + 10 > 500){
                         text2.giveOutput("you can't go higher than 500");
                         as.add(text2);
-                    }else {
+                    }else if(ten + 1 > bills10){
+                        text2.giveOutput("We are out of tens");
+                        as.add(text2);
+                    }
+                    else {
                         money = money + 10;
                         ten++;
-                        text2.giveOutput("Total = " + money);
-                        as.add(text2);
+                        text3.giveOutput("Total = " + money);
+                        as.add(text3);
                     }
                     textTen.giveOutput(ten + "x 10 = " + 10*ten);
                     as.add(textTen);
-                    System.out.println(money);
                 }
                 if(input == "-20"){
                     if(twenty > 0){
@@ -461,23 +394,25 @@ public class ATM {
                     }
                     textTwenty.giveOutput(twenty + "x 20 = " + 20*twenty);
                     as.add(textTwenty);
-                    text2.giveOutput("Total = " + money);
-                    as.add(text2);
-                    System.out.println(money);
+                    text3.giveOutput("Total = " + money);
+                    as.add(text3);
                 }
                 if(input == "+20"){
                     if (money + 20 > 500){
                         text2.giveOutput("you can't go higher than 500");
                         as.add(text2);
-                    }else{
+                    }else if(twenty + 1 > bills20){
+                        text2.giveOutput("We are out of twenty's");
+                        as.add(text2);
+                    }
+                    else{
                         money = money + 20;
                         twenty++;
-                        text2.giveOutput("Total = " + money);
-                        as.add(text2);
+                        text3.giveOutput("Total = " + money);
+                        as.add(text3);
                     }
                     textTwenty.giveOutput(twenty + "x 20 = " + 20*twenty);
                     as.add(textTwenty);
-                    System.out.println(money);
                 }
                 if(input == "-50"){
                     if(fifty > 0){
@@ -486,28 +421,48 @@ public class ATM {
                     }
                     textFifty.giveOutput(fifty + "x 50 = " + 50*fifty);
                     as.add(textFifty);
-                    text2.giveOutput("Total = " + money);
-                    as.add(text2);
-                    System.out.println(money);
+                    text3.giveOutput("Total = " + money);
+                    as.add(text3);
                 }
                 if(input == "+50"){
                     if (money + 50 > 500){
                         text2.giveOutput("you can't go higher than 500");
                         as.add(text2);
-                    }else {
+                    }else if(fifty + 1 > bills50){
+                        text2.giveOutput("We are out of fifty's");
+                        as.add(text2);
+                    }
+                    else {
                         money = money + 50;
                         fifty++;
-                        text2.giveOutput("Total = " + money);
-                        as.add(text2);
+                        text3.giveOutput("Total = " + money);
+                        as.add(text3);
                     }
                     textFifty.giveOutput(fifty + "x 50 = " + 50*fifty);
                     as.add(textFifty);
-                    System.out.println(money);
                 }
                 if(input == "okay"){
-                    text2.giveOutput("Total = " + money);
-                    as.add(text2);
+                    text3.giveOutput("Total = " + money);
+                    as.add(text3);
                     moneyTaken = true;
+                    chosenAmount = Integer.toString(money);
+                    if(Database.withdraw(cardnumber, wachtwoord, chosenAmount)){
+                        Database.atm(ten, twenty, fifty);
+                        moneyTaken = true;
+                    }
+                    else if (money == 0){
+                        text2.giveOutput("You have to chose an amount");
+                        moneyTaken = false;
+                    }
+                    else{
+                        text2.giveOutput("You don't have enough money");
+                        moneyTaken = false;
+                    }
+                }
+                if(input == "Quit"){
+                    restart();
+                }
+                if(moneyTaken){
                     break;
                 }
             }if(moneyTaken){
